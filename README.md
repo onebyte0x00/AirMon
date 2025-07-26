@@ -1,5 +1,5 @@
 # AirMon
-the plan is to create a FOSS small app to monitors, processes, stores, and visualizes wireless signal (BT and Wifi) then expand it's functionality,
+the plan is to create a FOSS app that monitors, processes, stores, and visualizes wireless signal (BT and Wifi) then expand it's functionality,
 it has to be small enough to work on raspberry pi zero W 2 (with 512 MB of RAM).
  you can take part in the project and contribute with ideas or code, you are welcome :)
 
