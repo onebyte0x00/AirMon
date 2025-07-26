@@ -1,0 +1,10 @@
+name: Unusual Bluetooth Device Count
+type: cardinality
+index: bluetooth-wifi-*
+timeframe:
+  hours: 1
+cardinality_field: "devices.address"
+max_cardinality: 20
+alert:
+- "command"
+command: ["python3", "/opt/elastalert/alerts/custom_alerts.py", "bluetooth_anomaly"]
