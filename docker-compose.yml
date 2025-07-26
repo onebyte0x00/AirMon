@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  bluetooth-scanner:
+    build:
+      context: .
+      dockerfile: Dockerfile.scanner
+    devices:
+      - "/dev/bus/usb:/dev/bus/usb"  # For Bluetooth access
+    network_mode: "host"              # Required for WiFi scanning
+    depends_on:
+      - fluent-bit
+    restart: unless-stopped
+
+  fluent-bit:
+    image: fluent/fluent-bit:1.8
+    ports:
+      - "24224:24224"
+      - "2020:2020"  # For monitoring
+    volumes:
+      - ./config/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.2
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+      - xpack.security.enabled=false
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    restart: unless-stopped
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.16.2
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:8.3.4
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+
+  elastalert:
+    image: bitsensor/elastalert:3.0.0-beta.1
+    volumes:
+      - ./config/elastalert_config.yaml:/opt/elastalert/config.yaml
+      - ./config/bluetooth_anomaly.yaml:/opt/elastalert/rules/bluetooth_anomaly.yaml
+      - ./alerts:/opt/elastalert/alerts
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+
+volumes:
+  esdata:
+  grafana-data:
